@@ -1,0 +1,18 @@
+#ifndef _Discord_RNG_Discord_RNG_h_
+#define _Discord_RNG_Discord_RNG_h_
+#include <SmartUppBot/SmartBotUpp.h>
+
+using namespace Upp;
+class Discord_RNG: public DiscordModule{
+	private:
+		
+		void launchCommande(ValueMap payload);
+		
+	public:
+		
+		Discord_RNG(Upp::String _name, Upp::String _prefix);
+		
+		void Events(ValueMap payload);
+
+};
+#endif
