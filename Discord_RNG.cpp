@@ -7,17 +7,23 @@ void Discord_RNG::launchCommande(ValueMap payload){
 	int nbEquipe;
 	int nbJoueurs;
 	int nbJoueursParEquipe;
+	VectorMap<int, Upp::String> lesJoueurs;
 	
 	if (isStringisANumber(MessageArgs[1]) && !MessageArgs[1].IsEqual("0")){
 		nbEquipe = atoi(MessageArgs[1]); 
 		nbJoueurs = MessageArgs.GetCount() - 2; // MessageArgs[0] == "teams" && MessageArgs[1] == "{nombre d'équipe}"
+		
+		for (int i = 2; i <= nbJoueurs + 1; i++){		
+			lesJoueurs.Add(rand() % 1000, MessageArgs[i]);
+		}
 	} else{
 		// Si MessageArgs[1] n'est pas un int, on défini 2 équipes par défaut
 		nbEquipe = 2;
 		nbJoueurs = MessageArgs.GetCount() - 1; // MessageArgs[0] == "teams"
+		for (int i = 1; i <= nbJoueurs; i++){		
+			lesJoueurs.Add(rand() % 1000, MessageArgs[i]);
+		}
 	}
-	
-	VectorMap<int, Upp::String> lesJoueurs;
 	
 	if (nbJoueurs % nbEquipe == 0){ 
 		// Nombre de joueurs divisable par le nombre d'équipe, pas besoin de Bot
@@ -41,12 +47,12 @@ void Discord_RNG::launchCommande(ValueMap payload){
 	// peut savoir combien de joueurs il y aura par équipe
 	nbJoueursParEquipe = nbJoueurs / nbEquipe;
 	
-	for (int i = 1; i < nbJoueurs; i++){		
-		lesJoueurs.Add(rand() % 1000, MessageArgs[i]);
-	}
-	
 	//Tri de la liste des joueurs selon leur nombre random du plus petit au plus grand
 	SortByKey(lesJoueurs);
+	
+	for (Upp::String jo : lesJoueurs){
+		Cout() << jo << "\n";
+	}
 	
 	Upp::String message = "";
 	
@@ -54,15 +60,13 @@ void Discord_RNG::launchCommande(ValueMap payload){
 	
 	message = message << "Team n." << equipeNumber << " : \n";
 	
-	for (int joueur = 1; joueur < nbJoueurs + 1; ++joueur){
-		
-		if (joueur % nbJoueursParEquipe != 0){
-			message = message << "  -  " << lesJoueurs[joueur - 1] << "\n";
-		}
-		else{
-			message = message << "  -  " << lesJoueurs[joueur - 1] << "\n";
+	for (int joueur = 1; joueur <= nbJoueurs; joueur++){
+		message = message << "  -  " << lesJoueurs[joueur - 1] << "\n";
+		if (joueur % nbJoueursParEquipe == 0){
 			equipeNumber++;
-			message = message <<"Team n." << equipeNumber << " : \n";
+			if (equipeNumber <= nbEquipe){	
+				message = message <<"Team n." << equipeNumber << " : \n";
+			}
 		}
 		
 	}
