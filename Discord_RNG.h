@@ -3,6 +3,7 @@
 #include <SmartUppBot/SmartBotUpp.h>
 
 using namespace Upp;
+
 class Discord_RNG: public DiscordModule{
 	private:
 		
@@ -12,7 +13,7 @@ class Discord_RNG: public DiscordModule{
 		
 		Discord_RNG(Upp::String _name, Upp::String _prefix);
 		
-		void Events(ValueMap payload);
+		void EventsMessageCreated(ValueMap payload);
 
 };
 #endif
