@@ -25,22 +25,75 @@ void Discord_RNG::launchCommande(ValueMap payload){
 		}
 	}
 	
-	if (nbJoueurs % nbEquipe == 0){ 
-		// Nombre de joueurs divisable par le nombre d'équipe, pas besoin de Bot
-	} else if(nbJoueurs % nbEquipe == 1){ // Un joueur manquant
-		ptrBot->CreateMessage(this->ChannelLastMessage, "Le joueur manquant sera remplacé par <@!314391413200650250>.");
-		lesJoueurs.Add(1, "<@!314391413200650250>");
-		nbJoueurs += 1;
-	}
-	else if(nbJoueurs % nbEquipe == 2){ // Deux joueurs manquant
-		ptrBot->CreateMessage(this->ChannelLastMessage, "Les joueurs manquants seront remplacés par <@!314391413200650250> n.1,  <@!314391413200650250> n.2 et <@!314391413200650250> n.3.");
-		lesJoueurs.Add(1, "<@!314391413200650250>");
-		lesJoueurs.Add(2, "<@!314391413200650250>");
-		nbJoueurs += 2;
-	}
-	else{ // Foutage de gueule
-		ptrBot->CreateMessage(this->ChannelLastMessage, "Tu m'a saoulé avec tes calculs à la con toi !");
+	if (nbJoueurs < nbEquipe){
+		ptrBot->CreateMessage(this->ChannelLastMessage, "Le nombre d'équipes à former est supérieur au nombre de joueurs !");// + nbEquipe + " avec " + nbJoueurs + " !");
 		return;
+	}
+	
+	int nbJoueursManquant = 0;
+	
+	switch(nbJoueurs % nbEquipe){
+		case 0:
+			// Nombre de joueurs divisable par le nombre d'équipe, pas besoin de Bot
+			break;
+		case 1:
+			switch(nbEquipe){
+				case 2:
+					ptrBot->CreateMessage(this->ChannelLastMessage, "Le joueur manquant sera remplacé par <@!314391413200650250>.");
+					lesJoueurs.Add(1, "<@!314391413200650250>");
+					nbJoueurs += 1;
+					break;
+				case 3:
+					ptrBot->CreateMessage(this->ChannelLastMessage, "Les joueurs manquants seront remplacés par <@!314391413200650250> n.1 et <@!314391413200650250> n.2.");
+					lesJoueurs.Add(1, "<@!314391413200650250> n.1");
+					lesJoueurs.Add(500, "<@!314391413200650250> n.2");
+					nbJoueurs += 2;
+					break;
+				case 4:
+					ptrBot->CreateMessage(this->ChannelLastMessage, "Les joueurs manquants seront remplacés par <@!314391413200650250> n.1 et <@!314391413200650250> n.2.");
+					lesJoueurs.Add(1, "<@!314391413200650250> n.1");
+					lesJoueurs.Add(333, "<@!314391413200650250> n.2");
+					lesJoueurs.Add(666, "<@!314391413200650250> n.3");
+					nbJoueurs += 3;
+					break;
+				default:
+					ptrBot->CreateMessage(this->ChannelLastMessage, "Impossible de créer moins de 2 équipes ou plus de 4 équipes");
+					return;
+			}
+			break;
+		case 2:
+			switch(nbEquipe){
+				case 3:
+					ptrBot->CreateMessage(this->ChannelLastMessage, "Le joueur manquant sera remplacé par <@!314391413200650250>.");
+					lesJoueurs.Add(1, "<@!314391413200650250>");
+					nbJoueurs += 1;
+					break;
+				case 4:
+					ptrBot->CreateMessage(this->ChannelLastMessage, "Les joueurs manquants seront remplacés par <@!314391413200650250> n.1 et <@!314391413200650250> n.2.");
+					lesJoueurs.Add(1, "<@!314391413200650250> n.1");
+					lesJoueurs.Add(500, "<@!314391413200650250> n.2");
+					nbJoueurs += 2;
+					break;
+				default:
+					ptrBot->CreateMessage(this->ChannelLastMessage, "Impossible de créer moins de 2 équipes ou plus de 4 équipes");
+					return;
+			}
+			break;
+		case 3:
+			switch(nbEquipe){
+				case 4:
+					ptrBot->CreateMessage(this->ChannelLastMessage, "Le joueur manquant sera remplacé par <@!314391413200650250>.");
+					lesJoueurs.Add(1, "<@!314391413200650250>");
+					nbJoueurs += 1;
+					break;
+				default:
+					ptrBot->CreateMessage(this->ChannelLastMessage, "Impossible de créer moins de 2 équipes ou plus de 4 équipes");
+					return;
+			}
+			break;
+		default:
+			ptrBot->CreateMessage(this->ChannelLastMessage, "Tu m'a saoulé avec tes calculs à la con toi !");
+			return;
 	}
 	
 	// Maintenant que l'on est sur que l'on peut mettre tout les joueurs dans les équipes, on
