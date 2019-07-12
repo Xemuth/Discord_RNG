@@ -3,7 +3,7 @@
 #include "Discord_RNG.h"
 
 using namespace Upp;
-void Discord_RNG::launchCommande(ValueMap payload){
+void Discord_RNG::teams(ValueMap payload){
 	int nbEquipe;
 	int nbJoueurs;
 	int nbJoueursParEquipe;
@@ -32,61 +32,61 @@ void Discord_RNG::launchCommande(ValueMap payload){
 	
 	int nbJoueursManquant = 0;
 	
-	switch(nbJoueurs % nbEquipe){
+	switch(nbJoueurs % nbEquipe){ //Reste de joueurs sur la dernière équipe
 		case 0:
 			// Nombre de joueurs divisable par le nombre d'équipe, pas besoin de Bot
 			break;
-		case 1:
+		case 1: // Il reste un joueur dans la dernière équipe
 			switch(nbEquipe){
-				case 2:
+				case 2: // Si on a 2 équipe et qu'il ne reste qu'un joueur, on ajoute 1 bot
 					ptrBot->CreateMessage(this->ChannelLastMessage, "Le joueur manquant sera remplacé par <@!314391413200650250>.");
 					lesJoueurs.Add(1, "<@!314391413200650250>");
 					nbJoueurs += 1;
 					break;
-				case 3:
+				case 3: // Si on a 3 équipes et qu'il ne reste qu'un joueur, on ajoute 2 bots
+					ptrBot->CreateMessage(this->ChannelLastMessage, "Les joueurs manquants seront remplacés par <@!314391413200650250> n.1 et <@!314391413200650250> n.2.");
+					lesJoueurs.Add(1, "<@!314391413200650250> n.1");
+					lesJoueurs.Add(1000, "<@!314391413200650250> n.2");
+					nbJoueurs += 2;
+					break;
+				case 4:// Si on a 4 équipes et qu'il ne reste qu'un joueur, on ajoute 3 bots
 					ptrBot->CreateMessage(this->ChannelLastMessage, "Les joueurs manquants seront remplacés par <@!314391413200650250> n.1 et <@!314391413200650250> n.2.");
 					lesJoueurs.Add(1, "<@!314391413200650250> n.1");
 					lesJoueurs.Add(500, "<@!314391413200650250> n.2");
-					nbJoueurs += 2;
-					break;
-				case 4:
-					ptrBot->CreateMessage(this->ChannelLastMessage, "Les joueurs manquants seront remplacés par <@!314391413200650250> n.1 et <@!314391413200650250> n.2.");
-					lesJoueurs.Add(1, "<@!314391413200650250> n.1");
-					lesJoueurs.Add(333, "<@!314391413200650250> n.2");
-					lesJoueurs.Add(666, "<@!314391413200650250> n.3");
+					lesJoueurs.Add(1000, "<@!314391413200650250> n.3");
 					nbJoueurs += 3;
 					break;
-				default:
+				default: // Fonctionnalité limité à 2, 3 ou 4 équipes
 					ptrBot->CreateMessage(this->ChannelLastMessage, "Impossible de créer moins de 2 équipes ou plus de 4 équipes");
 					return;
 			}
 			break;
-		case 2:
+		case 2: // Il reste 2 joueurs dans la dernière équipe
 			switch(nbEquipe){
-				case 3:
+				case 3: // Si on a 3 équipes et qu'il reste 2 joueurs, on ajoute 1 bots
 					ptrBot->CreateMessage(this->ChannelLastMessage, "Le joueur manquant sera remplacé par <@!314391413200650250>.");
 					lesJoueurs.Add(1, "<@!314391413200650250>");
 					nbJoueurs += 1;
 					break;
-				case 4:
+				case 4:// Si on a 4 équipes et qu'il reste 2 joueurs, on ajoute 2 bots
 					ptrBot->CreateMessage(this->ChannelLastMessage, "Les joueurs manquants seront remplacés par <@!314391413200650250> n.1 et <@!314391413200650250> n.2.");
 					lesJoueurs.Add(1, "<@!314391413200650250> n.1");
-					lesJoueurs.Add(500, "<@!314391413200650250> n.2");
+					lesJoueurs.Add(1000, "<@!314391413200650250> n.2");
 					nbJoueurs += 2;
 					break;
-				default:
+				default:// Fonctionnalité limité à 2, 3 ou 4 équipes
 					ptrBot->CreateMessage(this->ChannelLastMessage, "Impossible de créer moins de 2 équipes ou plus de 4 équipes");
 					return;
 			}
 			break;
-		case 3:
+		case 3: // Il reste 3 joueurs dans la dernière équipe
 			switch(nbEquipe){
-				case 4:
+				case 4: // Si on a 4 équipes et qu'il reste 3 joueurs, on ajoute 1 bots
 					ptrBot->CreateMessage(this->ChannelLastMessage, "Le joueur manquant sera remplacé par <@!314391413200650250>.");
 					lesJoueurs.Add(1, "<@!314391413200650250>");
 					nbJoueurs += 1;
 					break;
-				default:
+				default:// Fonctionnalité limité à 2, 3 ou 4 équipes
 					ptrBot->CreateMessage(this->ChannelLastMessage, "Impossible de créer moins de 2 équipes ou plus de 4 équipes");
 					return;
 			}
@@ -121,19 +121,23 @@ void Discord_RNG::launchCommande(ValueMap payload){
 				message = message <<"Team n." << equipeNumber << " : \n";
 			}
 		}
-		
 	}
-	
 	ptrBot->CreateMessage(this->ChannelLastMessage, message);
+}
+
+void Discord_RNG::rng(ValueMap payload){
+	int maxRand = atoi(MessageArgs[0]);
+	int testt = (rand() % maxRand);
+ 	ptrBot->CreateMessage(this->ChannelLastMessage,  testt + "" );
 }
 
 Discord_RNG::Discord_RNG(Upp::String _name, Upp::String _prefix){
 	name = _name;
 	prefix = _prefix;
 	
-	EventsMapMessageCreated.Add([&](ValueMap e) {if(MessageArgs[0].IsEqual("teams"))this->launchCommande(e);});
+	EventsMapMessageCreated.Add([&](ValueMap e){if(isStringisANumber(MessageArgs[0]))this->rng(e);});
+	EventsMapMessageCreated.Add([&](ValueMap e){if(MessageArgs[0].IsEqual("teams"))this->teams(e);});
 }
-
 void Discord_RNG::EventsMessageCreated(ValueMap payload){
 	for (auto&e : EventsMapMessageCreated){
 		e(payload);
