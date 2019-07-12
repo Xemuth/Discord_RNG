@@ -3,7 +3,7 @@
 #include "Discord_RNG.h"
 
 using namespace Upp;
-void Discord_RNG::teams(ValueMap payload){
+void Discord_RNG::RandomTeams(ValueMap payload){
 	int nbEquipe;
 	int nbJoueurs;
 	int nbJoueursParEquipe;
@@ -125,18 +125,37 @@ void Discord_RNG::teams(ValueMap payload){
 	ptrBot->CreateMessage(this->ChannelLastMessage, message);
 }
 
-void Discord_RNG::rng(ValueMap payload){
+void Discord_RNG::RandomNumber(ValueMap payload){
 	int maxRand = atoi(MessageArgs[0]);
-	int testt = (rand() % maxRand);
- 	ptrBot->CreateMessage(this->ChannelLastMessage,  testt + "" );
+	int random = rand() % maxRand;
+ 	ptrBot->CreateMessage(this->ChannelLastMessage,  AsString(random));
+}
+
+void Discord_RNG::RandomOwHero(ValueMap payload){
+	Vector<Upp::String> heroes;
+	
+	heroes.Add("Ana");
+	heroes.Add("Bastion");
+	heroes.Add("Baptiste");
+	heroes.Add("Brigitte");
+	heroes.Add("Bastion");
+	heroes.Add("Faucheur");
+	heroes.Add("Fatale");
+	heroes.Add("Dva");
+	
+	int rng = rand() % 8;
+	Upp::String random = heroes[rng];
+	
+	ptrBot->CreateMessage(this->ChannelLastMessage, random);
 }
 
 Discord_RNG::Discord_RNG(Upp::String _name, Upp::String _prefix){
 	name = _name;
 	prefix = _prefix;
 	
-	EventsMapMessageCreated.Add([&](ValueMap e){if(isStringisANumber(MessageArgs[0]))this->rng(e);});
-	EventsMapMessageCreated.Add([&](ValueMap e){if(MessageArgs[0].IsEqual("teams"))this->teams(e);});
+	EventsMapMessageCreated.Add([&](ValueMap e){if(isStringisANumber(MessageArgs[0]))this->RandomNumber(e);});
+	EventsMapMessageCreated.Add([&](ValueMap e){if(MessageArgs[0].IsEqual("teams"))this->RandomTeams(e);});
+	EventsMapMessageCreated.Add([&](ValueMap e){if(MessageArgs[0].IsEqual("ow"))this->RandomOwHero(e);});
 }
 void Discord_RNG::EventsMessageCreated(ValueMap payload){
 	for (auto&e : EventsMapMessageCreated){
