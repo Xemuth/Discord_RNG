@@ -103,10 +103,6 @@ void Discord_RNG::RandomTeams(ValueMap payload){
 	//Tri de la liste des joueurs selon leur nombre random du plus petit au plus grand
 	SortByKey(lesJoueurs);
 	
-	for (Upp::String jo : lesJoueurs){
-		Cout() << jo << "\n";
-	}
-	
 	Upp::String message = "";
 	
 	int equipeNumber = 1;
@@ -149,6 +145,22 @@ void Discord_RNG::RandomOwHero(ValueMap payload){
 	ptrBot->CreateMessage(this->ChannelLastMessage, random);
 }
 
+void Discord_RNG::Help(ValueMap payload){
+	Upp::String message;
+	
+	message = "```\n";
+	
+	message = message << "Prefixe : !rng\n\n";
+	
+	message = message << "!rng(int max) -> Renvoie un nombre aléatoire compris entre 0 et le nombre spécifié.\n\n";
+	message = message << "Teams(int NombreEquipes = 2, String... joueurs) -> Créer des équipes aléatoires avec les joueurs spécifié, par défaut les joueurs sont divisés en 2 équipes.\n\n";
+	message = message << "Ow() -> Renvoie un héro d'overwatch aléatoire.\n\n";
+	
+	message = message << "```";
+	
+	ptrBot->CreateMessage(this->ChannelLastMessage, message);
+}
+
 Discord_RNG::Discord_RNG(Upp::String _name, Upp::String _prefix){
 	name = _name;
 	prefix = _prefix;
@@ -156,6 +168,7 @@ Discord_RNG::Discord_RNG(Upp::String _name, Upp::String _prefix){
 	EventsMapMessageCreated.Add([&](ValueMap e){if(isStringisANumber(MessageArgs[0]))this->RandomNumber(e);});
 	EventsMapMessageCreated.Add([&](ValueMap e){if(MessageArgs[0].IsEqual("teams"))this->RandomTeams(e);});
 	EventsMapMessageCreated.Add([&](ValueMap e){if(MessageArgs[0].IsEqual("ow"))this->RandomOwHero(e);});
+	EventsMapMessageCreated.Add([&](ValueMap e){if(MessageArgs[0].IsEqual("help"))this->Help(e);});
 }
 void Discord_RNG::EventsMessageCreated(ValueMap payload){
 	for (auto&e : EventsMapMessageCreated){

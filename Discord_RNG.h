@@ -10,6 +10,7 @@ class Discord_RNG: public DiscordModule{
 		void RandomTeams(ValueMap payload);
 		void RandomNumber(ValueMap payload);
 		void RandomOwHero(ValueMap payload);
+		void Help(ValueMap payload);
 		
 	public:
 		
