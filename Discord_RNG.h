@@ -7,10 +7,13 @@ using namespace Upp;
 class Discord_RNG: public DiscordModule{
 	private:
 		
-		void RandomTeams(ValueMap payload);
-		void RandomNumber(ValueMap payload);
-		void RandomOwHero(ValueMap payload);
+		void Teams(ValueMap payload);
+		void Number(ValueMap payload);
+		void Ow(ValueMap payload);
 		void Help(ValueMap payload);
+		void Love(ValueMap payload);
+		Upp::String SayTeam(int numEquipe);
+		Upp::String SayJoueur(String joueur);
 		
 	public:
 		
