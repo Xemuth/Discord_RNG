@@ -16,6 +16,7 @@ class Discord_RNG: public DiscordModule{
 		Upp::String SayJoueur(String joueur);
 		
 	public:
+		virtual String Credit(ValueMap json,bool sendCredit = true);
 		
 		Discord_RNG(Upp::String _name, Upp::String _prefix);
 		

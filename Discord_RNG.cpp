@@ -116,7 +116,7 @@ void Discord_RNG::Teams(ValueMap payload){
 		}
 	}
 	
-	ptrBot->CreateMessage(this->ChannelLastMessage, message);
+	BotPtr->CreateMessage(this->ChannelLastMessage, message);
 }
 
 Upp::String Discord_RNG::SayTeam(int numEquipe){
@@ -130,7 +130,7 @@ Upp::String Discord_RNG::SayJoueur(String joueur){
 void Discord_RNG::Number(ValueMap payload){
 	int maxRand = atoi(MessageArgs[0]);
 	int random = Randomf() * maxRand;
- 	ptrBot->CreateMessage(this->ChannelLastMessage,  AsString(random));
+ 	BotPtr->CreateMessage(this->ChannelLastMessage,  AsString(random));
 }
 
 void Discord_RNG::Ow(ValueMap payload){
@@ -175,9 +175,9 @@ void Discord_RNG::Ow(ValueMap payload){
 	heroes.Add("Zenyatta");
 	
 	int r = rand() % sizeof(json["competitiveStats"]["topHeroes"]);
-	//ptrBot->CreateMessage(this->ChannelLastMessage, json["competitiveStats"]["topHeroes"].GetKey(ton ITERATOR);	
+	//BotPtr->CreateMessage(this->ChannelLastMessage, json["competitiveStats"]["topHeroes"].GetKey(ton ITERATOR);	
 	//Cout() << json["competitiveStats"]["topHeroes"].GetVA().Get(1).ToString();*/
-	ptrBot->CreateMessage(this->ChannelLastMessage, "Coming soon"); //.GetKey(r))
+	BotPtr->CreateMessage(this->ChannelLastMessage, "Coming soon"); //.GetKey(r))
 }
 
 void Discord_RNG::Love(ValueMap payload){
@@ -236,7 +236,7 @@ void Discord_RNG::Love(ValueMap payload){
 	
 	Cout() << name  << " + " << name2 << " = " << AsString(diff);
 	
-	ptrBot->CreateMessage(this->ChannelLastMessage, name + " et " + name2 + " sont compatibles à " + AsString(diff) + " \% !");
+	BotPtr->CreateMessage(this->ChannelLastMessage, name + " et " + name2 + " sont compatibles à " + AsString(diff) + " \% !");
 }
 
 void Discord_RNG::Help(ValueMap payload){
@@ -249,10 +249,10 @@ void Discord_RNG::Help(ValueMap payload){
 	message = message << "!rng <int max> -> Renvoie un nombre aléatoire compris entre 0 et le nombre spécifié.\n\n";
 	message = message << "!rng teams <int NombreEquipes = 2> <String joueur> <...> -> Créer des équipes aléatoires avec les joueurs spécifié, par défaut les joueurs sont divisés en 2 équipes.\n\n";
 	message = message << "!rng ow -> Renvoie un héro d'overwatch aléatoire.\n\n";
-	
+	message << "!rng credit()" <<" -> Affiche les crédit du module rng.\n\n";
 	message = message << "```";
 	
-	ptrBot->CreateMessage(this->ChannelLastMessage, message);
+	BotPtr->CreateMessage(this->ChannelLastMessage, message);
 }
 
 Discord_RNG::Discord_RNG(Upp::String _name, Upp::String _prefix){
@@ -263,9 +263,18 @@ Discord_RNG::Discord_RNG(Upp::String _name, Upp::String _prefix){
 	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("teams"))this->Teams(e);});
 	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("ow"))this->Ow(e);});
     EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("love"))this->Love(e);});
-	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("help"))this->Help(e);});
 
 }
+
+String Discord_RNG::Credit(ValueMap json,bool sendCredit){
+	String credit =  "----RNG Module have been made By Félix Soignon---\n";
+	credit << "-----------https://github.com/NattyRoot-----------\n";
+	credit << "Rng module is used to generate various random thing like team or number\n";
+	credit << "https://github.com/Xemuth/Discord_RNG";
+	if(sendCredit) BotPtr->CreateMessage(ChannelLastMessage,"```"+credit +"```");
+	return credit;
+}
+
 void Discord_RNG::EventsMessageCreated(ValueMap payload){
 	for (auto&e : EventsMapMessageCreated){
 		e(payload);
