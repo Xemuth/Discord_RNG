@@ -257,7 +257,7 @@ void Discord_RNG::Help(ValueMap payload){
 
 Discord_RNG::Discord_RNG(Upp::String _name, Upp::String _prefix){
 	name = _name;
-	prefix = _prefix;
+	AddPrefix(_prefix);
 	
 	EventsMapMessageCreated.Add([&](ValueMap e){if(isStringisANumber(Split(this->Message, " ")[0]))this->Number(e);});
 	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("teams"))this->Teams(e);});
