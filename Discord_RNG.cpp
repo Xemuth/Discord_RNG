@@ -3,120 +3,47 @@
 #include "Discord_RNG.h"
 
 using namespace Upp;
-void Discord_RNG::Teams(ValueMap payload){
-	int nbEquipe;
-	int nbJoueurs;
-	int nbJoueursParEquipe;
-	VectorMap<int, Upp::String> lesJoueurs;
-	Upp::String message;
-	
-	if (isStringisANumber(MessageArgs[1]) && !MessageArgs[1].IsEqual("0")){
-		nbEquipe = atoi(MessageArgs[1]); 
-		nbJoueurs = MessageArgs.GetCount() - 2; // MessageArgs[0] == "teams" && MessageArgs[1] == "{nombre d'équipe}"
-		
-		for (int i = 2; i <= nbJoueurs + 1; i++){		
-			lesJoueurs.Add(Randomf() * 1000, MessageArgs[i]);
+
+
+void Discord_RNG::PrepareEvent(){
+	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("rng"))this->Number();});
+	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("teams"))this->Teams();});
+	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("ow"))this->Ow();});
+    EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("love"))this->Love(e);});
+}
+
+void Discord_RNG::Teams(){
+	int NbEquipes = 2;
+	VectorMap<int,String> allPlayer;
+	if(MessageArgs.Find("nbequipe") && MessageArgs.Get("nbequipe").GetTypeName().IsEqual("int")) NbEquipes =  MessageArgs.Get("nbequipe").Get<int>();
+	if(MessageArgs.Find("joueurs") && MessageArgs.Get("joueurs").GetTypeName().IsEqual("String") &&  MessageArgs.Get("joueurs").Get<String>().Find(",") !=-1 ){
+		auto splitter = Split(MessageArgs.Get("joueurs").Get<String>(),",");
+		int NbBotToAdd = splitter.GetCount()%NbEquipes;
+		for(int e = 0;e < NbBotToAdd ; e++){
+			splitter.Add("<@!314391413200650250> NO "+(e+1));
 		}
-	} else{
-		// Si MessageArgs[1] n'est pas un int, on défini 2 équipes par défaut
-		nbEquipe = 2;
-		nbJoueurs = MessageArgs.GetCount() - 1; // MessageArgs[0] == "teams"
-		for (int i = 1; i <= nbJoueurs; i++){		
-			lesJoueurs.Add(Randomf() * 1000, MessageArgs[i]);
+		for(String& str : splitter){
+			allPlayer.Add(Randomf() * 1000,	str);
 		}
-	}
-	
-	if (nbJoueurs < nbEquipe){
-		message = message + "Le nombre d'équipes à former est supérieur au nombre de joueurs !";// + nbEquipe + " avec " + nbJoueurs + " !");
-		return;
-	}
-	
-	switch(nbJoueurs % nbEquipe){ //Reste de joueurs sur la dernière équipe
-		case 0:
-			// Nombre de joueurs divisable par le nombre d'équipe, pas besoin de Bot
-			break;
-		case 1: // Il reste un joueur dans la dernière équipe
-			switch(nbEquipe){
-				case 2: // Si on a 2 équipe et qu'il ne reste qu'un joueur, on ajoute 1 bot
-					message = message + "Le joueur manquant sera remplacé par <@!314391413200650250>.";
-					lesJoueurs.Add(1, "<@!314391413200650250>");
-					nbJoueurs += 1;
-					break;
-				case 3: // Si on a 3 équipes et qu'il ne reste qu'un joueur, on ajoute 2 bots
-					message = message + "Les joueurs manquants seront remplacés par <@!314391413200650250> n.1 et <@!314391413200650250> n.2.";
-					lesJoueurs.Add(1, 	"<@!314391413200650250> n.1");
-					lesJoueurs.Add(1000, "<@!314391413200650250> n.2");
-					nbJoueurs += 2;
-					break;
-				case 4:// Si on a 4 équipes et qu'il ne reste qu'un joueur, on ajoute 3 bots
-					message = message + "Les joueurs manquants seront remplacés par <@!314391413200650250> n.1 et <@!314391413200650250> n.2.";
-					lesJoueurs.Add(1, "<@!314391413200650250> n.1");
-					lesJoueurs.Add(500, "<@!314391413200650250> n.2");
-					lesJoueurs.Add(1000, "<@!314391413200650250> n.3");
-					nbJoueurs += 3;
-					break;
-				default: // Fonctionnalité limité à 2, 3 ou 4 équipes
-					message = message + "Impossible de créer moins de 2 équipes ou plus de 4 équipes";
-					return;
+		//Tri de la liste des joueurs selon leur nombre random du plus petit au plus grand
+		SortByKey(allPlayer);
+		//Faire l'affichage
+		int NbJParEquipe = (int)NbEquipes/splitter;
+		int cpt  = 0;
+		String message ="```";
+		for(i = 0; i < NbEquipes ; i++){
+			message << SayTeam((i+1)) << "\n";
+			for(e = 0; e < NbJParEquipe; e++){
+				message <<  "	"<<SayJoueur(allPlayer.Get(allPlayer.GetKey(cpt)))
+				cpt++;
 			}
-			break;
-		case 2: // Il reste 2 joueurs dans la dernière équipe
-			switch(nbEquipe){
-				case 3: // Si on a 3 équipes et qu'il reste 2 joueurs, on ajoute 1 bots
-					message = message + "Le joueur manquant sera remplacé par <@!314391413200650250>.";
-					lesJoueurs.Add(1, "<@!314391413200650250>");
-					nbJoueurs += 1;
-					break;
-				case 4:// Si on a 4 équipes et qu'il reste 2 joueurs, on ajoute 2 bots
-					message = message + "Les joueurs manquants seront remplacés par <@!314391413200650250> n.1 et <@!314391413200650250> n.2.";
-					lesJoueurs.Add(1, "<@!314391413200650250> n.1");
-					lesJoueurs.Add(1000, "<@!314391413200650250> n.2");
-					nbJoueurs += 2;
-					break;
-				default:// Fonctionnalité limité à 2, 3 ou 4 équipes
-					message = message + "Impossible de créer moins de 2 équipes ou plus de 4 équipes";
-					return;
-			}
-			break;
-		case 3: // Il reste 3 joueurs dans la dernière équipe
-			switch(nbEquipe){
-				case 4: // Si on a 4 équipes et qu'il reste 3 joueurs, on ajoute 1 bots
-					message = message + "Le joueur manquant sera remplacé par <@!314391413200650250>.";
-					lesJoueurs.Add(1, "<@!314391413200650250>");
-					nbJoueurs += 1;
-					break;
-				default:// Fonctionnalité limité à 2, 3 ou 4 équipes
-					message = message + "Impossible de créer moins de 2 équipes ou plus de 4 équipes";
-					return;
-			}
-			break;
-		default:
-				message = message + "Tu m'a saoulé avec tes calculs à la con toi !";
-			return;
-	}
-	
-	// Maintenant que l'on est sur que l'on peut mettre tout les joueurs dans les équipes, on
-	// peut savoir combien de joueurs il y aura par équipe
-	nbJoueursParEquipe = nbJoueurs / nbEquipe;
-	
-	//Tri de la liste des joueurs selon leur nombre random du plus petit au plus grand
-	SortByKey(lesJoueurs);
-	
-	
-	int equipeNumber = 1;
-	message = message + SayTeam(equipeNumber);
-	
-	for (int joueur = 1; joueur <= nbJoueurs; joueur++){
-		message = message + SayJoueur(lesJoueurs[joueur - 1]);
-		if (joueur % nbJoueursParEquipe == 0){
-			equipeNumber++;
-			if (equipeNumber <= nbEquipe){	
-				message = message + SayTeam(equipeNumber);
-			}
+			message << "\n\n";
 		}
+		message = "```";
+		BotPtr->CreateMessage(ChannelLastMessage,message);
+	}else{
+		BotPtr->CreateMessage(ChannelLastMessage,"Il me faut une liste de joueur !")
 	}
-	
-	BotPtr->CreateMessage(this->ChannelLastMessage, message);
 }
 
 Upp::String Discord_RNG::SayTeam(int numEquipe){
@@ -124,133 +51,111 @@ Upp::String Discord_RNG::SayTeam(int numEquipe){
 }
 
 Upp::String Discord_RNG::SayJoueur(String joueur){
-	return "  -  " << joueur << "\n";
+	return "-" << joueur << "\n";
 }
 
-void Discord_RNG::Number(ValueMap payload){
-	int maxRand = atoi(MessageArgs[0]);
-	int random = Randomf() * maxRand;
+void Discord_RNG::Number(){
+	int StartValue = 0;
+	int MaxValue= 100;
+	if(MessageArgs.Find("startvalue") != -1 &&  MessageArgs.Get("startvalue").GetTypeName().IsEqual("int")) StartValue = MessageArgs.Get("startvalue").Get<int>();
+	if(MessageArgs.Find("maxvalue") != -1 &&  MessageArgs.Get("maxvalue").GetTypeName().IsEqual("int")) StartValue = MessageArgs.Get("maxvalue").Get<int>();
+
+	int random =  StartValue + (Randomf() * MaxValue);
+	
  	BotPtr->CreateMessage(this->ChannelLastMessage,  AsString(random));
 }
 
-void Discord_RNG::Ow(ValueMap payload){
-/*	HttpRequest reqApi;
-	reqApi.Url("https://ow-api.com/v1/stats/pc/euw/NattyRoots-21691/complete");
-	reqApi.GET();
-	auto json = ParseJSON(reqApi.Execute());
+void Discord_RNG::Ow(){
+	Vector<Upp::String> heroes={
+	"Ana","Ash","Baptiste","Bastion",
+	"Brigitte","Bastion","Dva","Doomfist",
+	"Genji","Hanzo","Junkrat","Lùcio",
+	"McCree","Mei","Mercy","Moira",
+	"Orisa","Pharah","Reaper","Reinhardt",
+	"Roadhog","Sigma","Soldier: 76","Sombra",
+	"Symmetra","Torbjörn","Tracer","Widowmaker",
+	"Winston","Wrecking Ball","Zarya","Zenyatta"};
 	
-	Vector<Upp::String> heroes;
-	
-	heroes.Add("Ana");
-	heroes.Add("Ash");
-	heroes.Add("Baptiste");
-	heroes.Add("Bastion");
-	heroes.Add("Brigitte");
-	heroes.Add("Bastion");
-	heroes.Add("Dva");
-	heroes.Add("Doomfist");
-	heroes.Add("Genji");
-	heroes.Add("Hanzo");
-	heroes.Add("Junkrat");
-	heroes.Add("Lùcio");
-	heroes.Add("McCree");
-	heroes.Add("Mei");
-	heroes.Add("Mercy");
-	heroes.Add("Moira");
-	heroes.Add("Orisa");
-	heroes.Add("Pharah");
-	heroes.Add("Reaper");
-	heroes.Add("Reinhardt");
-	heroes.Add("Roadhog");
-	heroes.Add("Sigma");
-	heroes.Add("Soldier: 76");
-	heroes.Add("Sombra");
-	heroes.Add("Symmetra");
-	heroes.Add("Torbjörn");
-	heroes.Add("Tracer");
-	heroes.Add("Widowmaker");
-	heroes.Add("Winston");
-	heroes.Add("Wrecking Ball");
-	heroes.Add("Zarya");
-	heroes.Add("Zenyatta");
-	
-	int r = rand() % sizeof(json["competitiveStats"]["topHeroes"]);
-	//BotPtr->CreateMessage(this->ChannelLastMessage, json["competitiveStats"]["topHeroes"].GetKey(ton ITERATOR);	
-	//Cout() << json["competitiveStats"]["topHeroes"].GetVA().Get(1).ToString();*/
-	BotPtr->CreateMessage(this->ChannelLastMessage, "Coming soon"); //.GetKey(r))
+	int rng = (Randomf() * heroes.GetCount());
+	BotPtr->CreateMessage(this->ChannelLastMessage, heroes[rng]);
 }
 
 void Discord_RNG::Love(ValueMap payload){
-	String name = payload["d"]["author"]["username"];
-	String name2 = MessageArgs[0];
-	
-	int diff = 0;
-	int tmpDiff = 0;
-	
-	if (name.GetLength() > name2.GetLength()){
-		// name est le plus grand nom
-		for(int x = 0; x != name2.GetLength(); x++){
-			tmpDiff = AsString(name[x]).Compare(AsString(name2[x]));	
-			
-			switch(tmpDiff){
-				case 1:
-					tmpDiff = 16;
-					break;
-				case -1:
-					tmpDiff = 19;
-					break;
-				default:
-					break;
-			}
-			
-			diff += tmpDiff;
-			
-			if (diff > 100){
-				diff -= 100;
-			}
-		}		
-	}
-	else{
-		// name2 est soit plus grand soit égal à name
-		for(int x = 0; x != name.GetLength(); x++){
-			tmpDiff = AsString(name[x]).Compare(AsString(name2[x]));	
-			
-			switch(tmpDiff){
-				case 1:
-					tmpDiff = 10;
-					break;
-				case -1:
-					tmpDiff = 20;
-					break;
-				default:
-					break;
-			}
-			
-			diff += tmpDiff;
-			
-			if (diff > 100){
-				diff -= 100;
+	String name = AuthorId;
+	String name2 = "";
+	if(MessageArgs.Find("love") != -1 && MessageArgs.Get("love").Get<String>().IsEmpty()){
+		name2 =MessageArgs.Get("love").Get<String>();
+		int diff = 0;
+		int tmpDiff = 0;
+		
+		if (name.GetLength() > name2.GetLength()){
+			// name est le plus grand nom
+			for(int x = 0; x != name2.GetLength(); x++){
+				tmpDiff = AsString(name[x]).Compare(AsString(name2[x]));	
+				
+				switch(tmpDiff){
+					case 1:
+						tmpDiff = 16;
+						break;
+					case -1:
+						tmpDiff = 19;
+						break;
+					default:
+						break;
+				}
+				
+				diff += tmpDiff;
+				
+				if (diff > 100){
+					diff -= 100;
+				}
+			}		
+		}
+		else{
+			// name2 est soit plus grand soit égal à name
+			for(int x = 0; x != name.GetLength(); x++){
+				tmpDiff = AsString(name[x]).Compare(AsString(name2[x]));	
+				
+				switch(tmpDiff){
+					case 1:
+						tmpDiff = 10;
+						break;
+					case -1:
+						tmpDiff = 20;
+						break;
+					default:
+						break;
+				}
+				
+				diff += tmpDiff;
+				
+				if (diff > 100){
+					diff -= 100;
+				}
 			}
 		}
+		
+		//Cout() << name  << " + " << name2 << " = " << AsString(diff);
+		
+		BotPtr->CreateMessage(this->ChannelLastMessage, name + " et " + name2 + " sont compatibles à " + AsString(diff) + " \% !");
+	}else{
+		BotPtr->CreateMessage(this->ChannelLastMessage, "Je n'ai pas de nom !");
 	}
-	
-	Cout() << name  << " + " << name2 << " = " << AsString(diff);
-	
-	BotPtr->CreateMessage(this->ChannelLastMessage, name + " et " + name2 + " sont compatibles à " + AsString(diff) + " \% !");
 }
 
 void Discord_RNG::Help(ValueMap payload){
 	Upp::String message;
 	
-	message = "```\n";
-	
-	message = message << "Prefixe : !rng\n\n";
-	
-	message = message << "!rng <int max> -> Renvoie un nombre aléatoire compris entre 0 et le nombre spécifié.\n\n";
-	message = message << "!rng teams <int NombreEquipes = 2> <String joueur> <...> -> Créer des équipes aléatoires avec les joueurs spécifié, par défaut les joueurs sont divisés en 2 équipes.\n\n";
-	message = message << "!rng ow -> Renvoie un héro d'overwatch aléatoire.\n\n";
-	message << "!rng credit()" <<" -> Affiche les crédit du module rng.\n\n";
-	message = message << "```";
+	message = "```";
+	message << "Prefixe : !rng\n\n";
+	message << "*******'Ops' veut dire Optionnel. Chaque Argument noté Optionnel n'est pas obligatoire.*******\n\n";
+	message << "*******'Nom Discord' est le nom affiché lors de la mention de quelqu'un sur discord. Exemple : @Xemuth*******\n\n";
+	message << "!rng rng(Ops->StartValue:<Nombre entier> 20 ;Ops->MaxValue:<Nombre entier> 40) -> Renvoie un nombre aléatoire compris entre 0 et le nombre spécifié. Ses arguments son 'maxValue' qui défini la valeur Max et 'StartValue' qui définie la valeur de départ\n\n";
+	message << "!rng Teams(nbEquipe:<Nombre entier> 2;Joueurs:<Nom Discord || Chaine de caractère> @Xemuth, @Natty, @Jay, @Kazoie ...) -> Créer des équipes aléatoires avec les joueurs spécifié, par défaut les joueurs sont divisés en 2 équipes. Ses arguments sont 'NbEquipe' et 'Joueurs' qui possède la liste des joueurs séparé par une virgule.\n\n";
+	message << "!rng Ow -> Renvoie un héro d'overwatch aléatoire. Cette fonction n'a pas d'arguments.\n\n";
+	message << "!rng Love(love: <Nom Discord> @Xemuth) -> Donne le \% de compatibilité amoureuse entre l'émetteur et la personne en paramètre. Les paramètres sont 'love'.\n\n";
+	message << "!rng credit" <<" -> Affiche les crédit du module rng. Cette fonction n'a pas d'arguments\n\n";
+	message << "```";
 	
 	BotPtr->CreateMessage(this->ChannelLastMessage, message);
 }
@@ -258,12 +163,11 @@ void Discord_RNG::Help(ValueMap payload){
 Discord_RNG::Discord_RNG(Upp::String _name, Upp::String _prefix){
 	name = _name;
 	AddPrefix(_prefix);
-	
-	EventsMapMessageCreated.Add([&](ValueMap e){if(isStringisANumber(Split(this->Message, " ")[0]))this->Number(e);});
-	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("teams"))this->Teams(e);});
-	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("ow"))this->Ow(e);});
-    EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("love"))this->Love(e);});
+}
 
+Discord_RNG::Discord_RNG(Upp::String _name, Vector<String> _prefix){
+	name = _name;
+	AddPrefix(_prefix);
 }
 
 String Discord_RNG::Credit(ValueMap json,bool sendCredit){
