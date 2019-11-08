@@ -163,11 +163,13 @@ void Discord_RNG::Help(ValueMap payload){
 Discord_RNG::Discord_RNG(Upp::String _name, Upp::String _prefix){
 	name = _name;
 	AddPrefix(_prefix);
+	PrepareEvent();
 }
 
 Discord_RNG::Discord_RNG(Upp::String _name, Vector<String> _prefix){
 	name = _name;
 	AddPrefix(_prefix);
+	PrepareEvent();
 }
 
 String Discord_RNG::Credit(ValueMap json,bool sendCredit){
