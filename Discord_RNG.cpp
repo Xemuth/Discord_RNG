@@ -28,13 +28,13 @@ void Discord_RNG::Teams(){
 		//Tri de la liste des joueurs selon leur nombre random du plus petit au plus grand
 		SortByKey(allPlayer);
 		//Faire l'affichage
-		int NbJParEquipe = (int)NbEquipes/splitter;
+		int NbJParEquipe = (int)NbEquipes/splitter.GetCount();
 		int cpt  = 0;
 		String message ="```";
-		for(i = 0; i < NbEquipes ; i++){
+		for(int i = 0; i < NbEquipes ; i++){
 			message << SayTeam((i+1)) << "\n";
-			for(e = 0; e < NbJParEquipe; e++){
-				message <<  "	"<<SayJoueur(allPlayer.Get(allPlayer.GetKey(cpt)))
+			for(int e = 0; e < NbJParEquipe; e++){
+				message <<  "	"<<SayJoueur(allPlayer.Get(allPlayer.GetKey(cpt)));
 				cpt++;
 			}
 			message << "\n\n";
@@ -42,7 +42,7 @@ void Discord_RNG::Teams(){
 		message = "```";
 		BotPtr->CreateMessage(ChannelLastMessage,message);
 	}else{
-		BotPtr->CreateMessage(ChannelLastMessage,"Il me faut une liste de joueur !")
+		BotPtr->CreateMessage(ChannelLastMessage,"Il me faut une liste de joueur !");
 	}
 }
 
