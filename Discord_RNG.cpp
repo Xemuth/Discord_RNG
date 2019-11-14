@@ -6,13 +6,13 @@ using namespace Upp;
 
 
 void Discord_RNG::PrepareEvent(){
-	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("rng"))this->Number();});
-	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("teams"))this->Teams();});
-	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("ow"))this->Ow();});
-    EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("love"))this->Love(e);});
+	EventsMapMessageCreated.Add([&](ValueMap& e){if(this->NameOfFunction.IsEqual("rng"))this->Number(e);});
+	EventsMapMessageCreated.Add([&](ValueMap& e){if(this->NameOfFunction.IsEqual("teams"))this->Teams(e);});
+	EventsMapMessageCreated.Add([&](ValueMap& e){if(this->NameOfFunction.IsEqual("ow"))this->Ow(e);});
+    EventsMapMessageCreated.Add([&](ValueMap& e){if(this->NameOfFunction.IsEqual("love"))this->Love(e);});
 }
 
-void Discord_RNG::Teams(){
+void Discord_RNG::Teams(ValueMap& payload){
 	int NbEquipes = 2;
 	VectorMap<int,String> allPlayer;
 	if(MessageArgs.Find("nbequipe") && MessageArgs.Get("nbequipe").GetTypeName().IsEqual("int")) NbEquipes =  MessageArgs.Get("nbequipe").Get<int>();
@@ -54,7 +54,7 @@ Upp::String Discord_RNG::SayJoueur(String joueur){
 	return "-" << joueur << "\n";
 }
 
-void Discord_RNG::Number(){
+void Discord_RNG::Number(ValueMap& payload){
 	int StartValue = 0;
 	int MaxValue= 100;
 	if(MessageArgs.Find("startvalue") != -1 &&  MessageArgs.Get("startvalue").GetTypeName().IsEqual("int")) StartValue = MessageArgs.Get("startvalue").Get<int>();
@@ -65,7 +65,7 @@ void Discord_RNG::Number(){
  	BotPtr->CreateMessage(this->ChannelLastMessage,  AsString(random));
 }
 
-void Discord_RNG::Ow(){
+void Discord_RNG::Ow(ValueMap& payload){
 	Vector<Upp::String> heroes={
 	"Ana","Ash","Baptiste","Bastion",
 	"Brigitte","Bastion","Dva","Doomfist",
@@ -80,7 +80,7 @@ void Discord_RNG::Ow(){
 	BotPtr->CreateMessage(this->ChannelLastMessage, heroes[rng]);
 }
 
-void Discord_RNG::Love(ValueMap payload){
+void Discord_RNG::Love(ValueMap& payload){
 	String name = AuthorId;
 	String name2 = "";
 	if(MessageArgs.Find("love") != -1 && MessageArgs.Get("love").Get<String>().IsEmpty()){
@@ -143,7 +143,7 @@ void Discord_RNG::Love(ValueMap payload){
 	}
 }
 
-void Discord_RNG::Help(ValueMap payload){
+void Discord_RNG::Help(ValueMap& payload){
 	Upp::String message;
 	
 	message = "```";
@@ -172,7 +172,7 @@ Discord_RNG::Discord_RNG(Upp::String _name, Vector<String> _prefix){
 	PrepareEvent();
 }
 
-String Discord_RNG::Credit(ValueMap json,bool sendCredit){
+String Discord_RNG::Credit(ValueMap& json,bool sendCredit){
 	String credit =  "----RNG Module have been made By Félix Soignon---\n";
 	credit << "-----------https://github.com/NattyRoot-----------\n";
 	credit << "Rng module is used to generate various random thing like team or number\n";
