@@ -10,7 +10,7 @@ void Discord_RNG::Teams(ValueMap payload){
 	VectorMap<int, Upp::String> lesJoueurs;
 	Upp::String message;
 	
-	if (isStringisANumber(MessageArgs[1]) && !MessageArgs[1].IsEqual("0")){
+	if (DiscordModule::IsANumber(MessageArgs[1]) && !MessageArgs[1].IsEqual("0")){
 		nbEquipe = atoi(MessageArgs[1]); 
 		nbJoueurs = MessageArgs.GetCount() - 2; // MessageArgs[0] == "teams" && MessageArgs[1] == "{nombre d'équipe}"
 		
@@ -118,7 +118,7 @@ void Discord_RNG::Teams(ValueMap payload){
 	
 	BotPtr->CreateMessage(this->ChannelLastMessage, message);
 }
-
+	
 Upp::String Discord_RNG::SayTeam(int numEquipe){
 	return "Team n." << AsString(numEquipe) << " : \n";
 }
@@ -257,9 +257,9 @@ void Discord_RNG::Help(ValueMap payload){
 
 Discord_RNG::Discord_RNG(Upp::String _name, Upp::String _prefix){
 	name = _name;
-	prefix = _prefix;
+	AddPrefix(_prefix);
 	
-	EventsMapMessageCreated.Add([&](ValueMap e){if(isStringisANumber(Split(this->Message, " ")[0]))this->Number(e);});
+	EventsMapMessageCreated.Add([&](ValueMap e){if(DiscordModule::IsANumber(Split(this->Message, " ")[0]))this->Number(e);});
 	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("teams"))this->Teams(e);});
 	EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("ow"))this->Ow(e);});
     EventsMapMessageCreated.Add([&](ValueMap e){if(this->NameOfFunction.IsEqual("love"))this->Love(e);});
